@@ -1,0 +1,39 @@
+name: Release v0.1.0
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  syntax-check:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Windows PowerShell 5.1 syntax
+        shell: powershell
+        run: .\tests\parse-and-smoke.ps1
+
+  release:
+    needs: syntax-check
+    if: github.repository == 'Shardkiht/github-direct'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package v0.1.0 source
+        shell: bash
+        run: |
+          mkdir -p dist/GitHubDirect-v0.1.0
+          cp -R src tests README.md CHANGELOG.md RELEASE_NOTES.md LICENSE install.ps1 uninstall.ps1 publish.ps1 .gitignore dist/GitHubDirect-v0.1.0/
+          (cd dist && zip -qr ../GitHubDirect-v0.1.0.zip GitHubDirect-v0.1.0)
+      - name: Publish GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v0.1.0 >/dev/null 2>&1; then
+            echo "Release v0.1.0 already exists; will not overwrite"
+            exit 1
+          fi
+          gh release create v0.1.0 GitHubDirect-v0.1.0.zip --target main --title "v0.1.0" --notes-file RELEASE_NOTES.md

@@ -1,0 +1,5 @@
+*.log
+*.old
+*.zip
+*.bak
+.DS_Store

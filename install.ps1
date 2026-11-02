@@ -32,4 +32,5 @@ foreach ($spec in @(
 Write-Host "Scheduled tasks created. Interval: $IntervalMinutes minutes; startup task enabled."
 Write-Host 'Running first update (may take a few minutes)...'
 & $exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $dst -Mode Update
+if ($LASTEXITCODE -ne 0) { throw "Installed, but the first update failed. Review $dir\github-direct.log" }
 Write-Host "Done. Logs: $dir\github-direct.log"

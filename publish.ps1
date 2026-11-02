@@ -16,12 +16,7 @@ if ($info.nameWithOwner -ne $Repository) { throw "Unexpected repository: $($info
 if ($info.defaultBranchRef.name -ne 'main') { throw 'Expected main as the default branch. Review before publishing.' }
 & gh release view v0.1.0 --repo $Repository *> $null
 if ($LASTEXITCODE -eq 0) { throw 'v0.1.0 release already exists; refusing to overwrite.' }
-$zip = Join-Path $PSScriptRoot 'GitHubDirect-v0.1.0.zip'
-if (Test-Path -LiteralPath $zip) { Remove-Item -LiteralPath $zip -Force }
-$files = @('src', 'tests', 'README.md', 'CHANGELOG.md', 'RELEASE_NOTES.md',
-    'LICENSE', 'install.ps1', 'uninstall.ps1', 'publish.ps1', '.gitignore')
-Compress-Archive -Path $files -DestinationPath $zip -CompressionLevel Optimal -Force
-if (-not (Test-Path -LiteralPath $zip)) { throw 'ZIP archive creation failed.' }
-& gh release create v0.1.0 $zip --repo $Repository --target main --title 'v0.1.0' --notes-file RELEASE_NOTES.md
+$zip = & (Join-Path $PSScriptRoot 'package.ps1')
+& gh release create v0.1.0 $zip --repo $Repository --target (git rev-parse HEAD) --title 'v0.1.0' --notes-file RELEASE_NOTES.md
 if ($LASTEXITCODE -ne 0) { throw 'GitHub release creation failed.' }
 Write-Host "Published: https://github.com/$Repository/releases/tag/v0.1.0"

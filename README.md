@@ -14,16 +14,15 @@ Windows PowerShell 5.1 的 GitHub 主站无代理直连优化器。**v0.1.0 实�
 
 ## 安装
 
-先下载整个仓库 ZIP 并解压。**用管理员身份打开 Windows PowerShell 5.1**，进入解压目录：
+1. 从 [Releases](https://github.com/Shardkiht/github-direct/releases/latest) 下载 **GitHubDirect-v0.1.0.zip**（不要选 Source code）。
+2. 解压，打开里面的 **GitHubDirect** 文件夹。
+3. 双击 **安装.cmd**，在 Windows 管理员权限提示中选择“是”。
 
-```powershell
-Set-Location 'D:\Downloads\GitHubDirect-v0.1.0'  # 改成自己的解压目录
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\parse-and-smoke.ps1
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\src\github-direct.ps1 -Mode DryRun
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -IntervalMinutes 30
-```
+安装文件会自动申请管理员权限、安装脚本、创建开机和每 30 分钟的刷新任务，并立即运行一次检测。检测可能需要几分钟；完成或失败都会保留窗口，按 Enter 关闭。无需安装 Python、Git 或其他运行环境。若取消权限提示，则不会安装。
 
-安装后创建两个计划任务：`GitHubDirect-Startup`（系统启动时）和 `GitHubDirect-Refresh`（每 30 分钟）。安装会立即运行一次检测。
+请先解压完整文件夹，不要直接在 ZIP 中运行，也不要只复制安装文件。安装完成后可删除解压文件夹；之后自动使用 `%ProgramData%\GitHubDirect` 中的脚本。重复运行安装文件可以更新安装。
+
+高级用法（管理员 Windows PowerShell）：`powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 -IntervalMinutes 30`。
 
 ## 日常命令
 
@@ -38,7 +37,7 @@ schtasks /query /tn GitHubDirect-Refresh /v /fo list
 
 ## 卸载与恢复
 
-使用管理员 PowerShell，在解压/仓库目录：
+双击解压文件夹内的 **卸载.cmd**，确认管理员权限即可删除计划任务并恢复本工具修改的 Hosts 区块，默认保留备份和日志。也可使用管理员 PowerShell：
 
 ```powershell
 .\uninstall.ps1             # 删除任务，移除仅属于本工具的 Hosts 区块，保留备份日志
@@ -61,7 +60,7 @@ schtasks /query /tn GitHubDirect-Refresh /v /fo list
 - 不能确保 SSH Push/Pull 更稳定：Git 可通过 GitHub 官方 SSH 443 独立配置（`ssh.github.com:443`）。
 - `raw.githubusercontent.com`、Release 下载、Git LFS 等子域名不在 v0.1 范围；GitHub Meta 列表也可能不完整。
 - 每次检查最多默认 12 个候选，每个两次请求，可能花费较长时间；太频繁没有意义。
-- 这是兼容 PowerShell 5.1 的初版，**尚未在实际 Windows 电脑上完成端到端验收**；首次安装建议先运行 DryRun 并审阅日志。
+- 这是兼容 PowerShell 5.1 的初版，**尚未在实际 Windows 电脑上完成端到端验收**；已通过离线语法与安装包检查，真实提权安装、任务调度和网络检测尚未验收。可在安装前运行 `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\src\github-direct.ps1 -Mode DryRun`，并在安装后审阅日志。
 
 ## 参考文档
 

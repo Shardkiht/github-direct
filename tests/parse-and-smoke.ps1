@@ -1,7 +1,7 @@
-#requires -Version 5.1
+﻿#requires -Version 5.1
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$files = @('src\github-direct.ps1', 'install.ps1', 'uninstall.ps1', 'publish.ps1')
+$files = @('src\github-direct.ps1', 'install.ps1', 'uninstall.ps1', 'publish.ps1', 'launch.ps1', 'package.ps1', 'tests\package-smoke.ps1')
 foreach ($rel in $files) {
     $f = Join-Path $root $rel
     $tokens = $null
@@ -13,4 +13,5 @@ foreach ($rel in $files) {
     }
     Write-Host "OK parse: $rel"
 }
-Write-Host 'PASS syntax; live DryRun needs Windows network testing.'
+& (Join-Path $PSScriptRoot 'package-smoke.ps1')
+Write-Host 'PASS offline checks; no elevation, scheduled tasks, Hosts writes or live network testing.'

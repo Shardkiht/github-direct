@@ -14,8 +14,9 @@ if ($LASTEXITCODE -ne 0) { throw "Cannot access $Repository : $meta" }
 $info = ($meta | Out-String) | ConvertFrom-Json
 if ($info.nameWithOwner -ne $Repository) { throw "Unexpected repository: $($info.nameWithOwner)" }
 if ($info.defaultBranchRef.name -ne 'main') { throw 'Expected main as the default branch. Review before publishing.' }
-& gh release view v0.1.0 --repo $Repository *> $null
-if ($LASTEXITCODE -eq 0) { throw 'v0.1.0 release already exists; refusing to overwrite.' }
+$existing = & gh release list --repo $Repository --json tagName
+if ($LASTEXITCODE -ne 0) { throw 'Cannot query existing releases.' }
+if (@(($existing | Out-String | ConvertFrom-Json) | Where-Object { $_.tagName -eq 'v0.1.0' }).Count -gt 0) { throw 'v0.1.0 release already exists; refusing to overwrite.' }
 $zip = & (Join-Path $PSScriptRoot 'package.ps1')
 & gh release create v0.1.0 $zip --repo $Repository --target (git rev-parse HEAD) --title 'v0.1.0' --notes-file RELEASE_NOTES.md
 if ($LASTEXITCODE -ne 0) { throw 'GitHub release creation failed.' }
